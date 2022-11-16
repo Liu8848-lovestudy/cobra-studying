@@ -29,10 +29,12 @@ var (
 	levelFlag []bool // 路径级别标志
 	fileCount,
 	dirCount int
+	level int
+	len1  int
 )
 
 const (
-	space  = "   "
+	//space  = ""
 	line   = "│  "
 	last   = "└─ "
 	middle = "├─ "
@@ -40,26 +42,35 @@ const (
 
 func ShowPathTree(path string, length int) {
 	levelFlag = make([]bool, 0)
-	walk(path, 0)
+	len1 = length
+	walk(path)
 	fmt.Println(fmt.Sprintf("\n指定路径下有 %d 个目录，%d 个文件。", dirCount, fileCount))
 }
 
 // walk 递归遍历指定路径
-func walk(path string, level int) {
+func walk(path string) {
 	levelFlag = append(levelFlag, true)
 	if dir, err := os.ReadDir(path); err == nil {
 		for k, file := range dir {
 			absFile := filepath.Join(path, file.Name())
 			// 判断是否当前级别下的最后一个节点
-			var isLast bool
+			isLast := false
 			if k == len(dir)-1 {
 				isLast = true
+			}
+			if level >= len1 {
+				isLast = true
+				levelFlag = append(levelFlag, !isLast)
+				showLine(level, isLast, file)
+				continue
 			}
 			// 不是当前级别的最后节点，则设置为上级节点未结束
 			levelFlag = append(levelFlag, !isLast)
 			showLine(level, isLast, file)
 			if file.IsDir() {
-				walk(absFile, level+1)
+				level++
+				walk(absFile)
+				level--
 			}
 		}
 	} else {
@@ -72,6 +83,7 @@ func showLine(level int, isLast bool, file os.DirEntry) {
 	preFix := buildPrefix(level)
 	var out string
 	fName := file.Name()
+	//如果判断为文件夹则格式化名字
 	if file.IsDir() {
 		fName = fmt.Sprintf("<%s>", fName)
 		dirCount++
@@ -93,7 +105,7 @@ func buildPrefix(level int) string {
 		if levelFlag[i] {
 			result += line
 		} else {
-			result += space
+			//result += space
 		}
 	}
 	return result
@@ -111,5 +123,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// treeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	treeCmd.Flags().IntP("length", "L", 0, "目录树的深度")
+	treeCmd.Flags().IntP("length", "L", 100, "目录树的深度")
+
 }
