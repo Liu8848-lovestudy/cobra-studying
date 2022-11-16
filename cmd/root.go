@@ -12,8 +12,8 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "文件展示",
-	Short: "展示目录下文件",
-	Long:  "展示该目录下的所有文件",
+	Short: "展示文件",
+	Long:  "文件展示功能",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
